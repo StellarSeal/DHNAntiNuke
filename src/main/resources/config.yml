@@ -1,0 +1,95 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║              DHNAntiNuke — Cấu hình chống nuke block             ║
+# ╚══════════════════════════════════════════════════════════════════╝
+#
+# ┌──────────────────────────────────────────────────────────────────┐
+# │  HƯỚNG DẪN NẰM MỐI (dành cho người không rành kỹ thuật)          │
+# │                                                                  │
+# │  "Nuke" là gì?                                                   │
+# │    Là khi có người chơi dùng hack/cheat để phá hàng loạt block   │
+# │    cùng một lúc (cào cả một khu đất trong tích tắc), khiến       │
+# │    server lag nặng, map bị phá hoặc các máy khác bị kick.        │
+# │                                                                  │
+# │  Plugin này làm gì?                                              │
+# │    Nó đếm xem mỗi người chơi "bắt đầu đào" bao nhiêu block       │
+# │    trong 1 giây. Ai đào nhanh bất thường, vượt mức cho phép,     │
+# │    thì các lần đào vượt mức sẽ bị chặn ÂM THẦM.                  │
+# │                                                                  │
+# │    → Người chơi KHÔNG nhận được bất kỳ thông báo/cảnh báo nào.   │
+# │    → Chỉ console/log server mới biết việc chặn xảy ra.           │
+# │    → Hoạt động với mọi phiên bản client (nhờ ProtocolLib).       │
+# │                                                                  │
+# │  Sau khi sửa file này:                                            │
+# │    Dùng lệnh quản trị (ví dụ PlugMan) để reload plugin,          │
+# │    hoặc restart server. Plugin sẽ đọc lại cấu hình khi khởi động.│
+# └──────────────────────────────────────────────────────────────────┘
+
+anti-nuke:
+
+  # ──────────────────────────────────────────────────────────────────
+  #  GIỚI HẠN CỐ ĐỊNH — số block tối đa mỗi giây
+  # ──────────────────────────────────────────────────────────────────
+  #
+  #  Mỗi người chơi chỉ được "bắt đầu đào" tối đa BAO NHIÊU block
+  #  trong 1 giây. Vượt quá con số này → các lần đào tiếp theo
+  #  trong giây đó bị chặn âm thầm.
+  #
+  #  Gợi ý chọn số (khi không bật chế độ động TPS ở dưới):
+  #    • Người chơi bình thường (kể cả tay nghề, đào nhanh)
+  #      thường chỉ đạt 5–10 block/giây.
+  #    • Hack nuke có thể đạt HÀNG TRĂM block/giây.
+  #
+  #    • Quá thấp (dưới 10)  → dễ chặn nhầm người chơi tốt.
+  #    • Quá cao (trên 40)  → gần như không chặn được ai cả.
+  #    • Khuyến nghị: 20 (mặc định) — an toàn cho người chơi thật.
+  #
+  blocks-per-second: 30
+
+  # ──────────────────────────────────────────────────────────────────
+  #  GIỚI HẠN ĐỘNG THEO TPS (mặc định: tắt)
+  # ──────────────────────────────────────────────────────────────────
+  #
+  #  TPS là gì? — "Ticks mỗi giây", chỉ số "sức khỏe" của server:
+  #    • 20 TPS  = server chạy mượt đỉnh.
+  #    • Dưới 18 = server đang lag.
+  #    • Càng thấp = càng nguy hiểm.
+  #
+  #  Khi BẬT chế độ này: giới hạn sẽ TỰ ĐỘNG siết chặt theo TPS,
+  #  dựa trên BẢNG NGƯỠNG bạn khai báo bên dưới. Server càng lag
+  #  → kiểm tra càng gắt (vì nuke chính là thủ phạm thường gặp gây lag).
+  #
+  #  ⚠ QUAN TRỌNG: khi bật, chế độ này GHI ĐÈ con số
+  #    "blocks-per-second" ở trên. Con số đó chỉ còn là mức áp dụng
+  #    khi TPS KHÔNG rơi dưới bất kỳ ngưỡng nào trong bảng.
+  #
+  tps-dynamic-limit:
+
+    # BẬT (true) / TẮT (false) chế độ động.
+    # Người mới? → Để false như mặc định là được.
+    enabled: false
+
+    # ── BẢNG NGƯỠNG ──────────────────────────────────────────────
+    # Mỗi dòng có dạng   ngưỡng-TPS: giới-hạn
+    # Nghĩa: khi TPS rơi DƯỚI ngưỡng này → áp dụng giới hạn này.
+    #
+    # Ví dụ bên dưới (đọc chậm nhé):
+    #   19: 15  → TPS tụt dưới 19 → mỗi người chơi chỉ được 15 block/giây.
+    #   16: 10  → TPS tụt dưới 16 → siết xuống 10 block/giây.
+    #   12:  5  → TPS tụt dưới 12 → siết xuống  5 block/giây.
+    #   → TPS từ 19 trở lên → dùng "blocks-per-second" ở trên (20).
+    #
+    # Quy tắc khi TPS rơi dưới NHIỀU ngưỡng cùng lúc:
+    #   plugin lấy ngưỡng gần nhất phía trên TPS hiện tại.
+    #   Ví dụ TPS = 14 → rơi dưới cả 19 và 16 → áp dụng 10 (của ngưỡng 16).
+    #
+    # Bạn có thể thêm/bớt bao nhiêu ngưỡng tùy ý, không cần theo thứ tự.
+    # Ngưỡng được phép có số lẻ, ví dụ: 18.5: 12
+    #
+    # ⚠ CẦN ÍT NHẤT 1 ngưỡng hợp lệ.
+    #   Nếu bảng trống (hoặc toàn số sai) → chế độ động TỰ ĐỘNG TẮT
+    #   và plugin dùng thẳng "blocks-per-second" ở trên.
+    #
+    thresholds:
+      19: 15
+      16: 10
+      12: 5

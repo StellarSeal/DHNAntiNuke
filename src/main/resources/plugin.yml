@@ -1,0 +1,15 @@
+name: DHNAntiNuke
+version: '${version}'
+
+main: me.stella.DHNAntiNuke
+api-version: '1.21'
+
+author: Stella
+description: Anti-nuke addon - rate-limits block digging per player (START_DESTROY_BLOCK packets/sec) via ProtocolLib, fully async, with optional TPS-threshold dynamic limits
+website: https://github.com/Stella
+depend: [ProtocolLib]
+
+permissions:
+  dhnantinuke.bypass:
+    description: Players with this permission are exempt from all dig-rate limits
+    default: op
